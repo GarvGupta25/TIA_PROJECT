@@ -14,3 +14,4 @@ torch
 torchvision
 Pillow
 qwen-vl-utils
+pypdfium2
