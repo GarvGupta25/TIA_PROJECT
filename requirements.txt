@@ -1,0 +1,16 @@
+gradio==4.44.0
+pydantic<2.11
+fastapi==0.111.0
+starlette==0.37.2
+pandas
+openpyxl
+reportlab
+plotly
+pdfminer.six
+transformers==4.46.0
+huggingface_hub<1.0
+accelerate
+torch
+torchvision
+Pillow
+qwen-vl-utils
