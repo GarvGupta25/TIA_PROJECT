@@ -30,12 +30,12 @@ Place the real employee workbook here:
 TASC_Sample_Database_vF.xlsx
 ```
 
-Copy Qwen local weights here for image extraction:
+Image extraction is routed to the remote FastAPI model endpoint:
 
 ```text
-models/qwen2_5_vl_7b/
+https://uncorrupt-lunar-imbecile.ngrok-free.dev/extract
 ```
 
-That folder must include `config.json`, tokenizer files, processor config, and all safetensors shards. Image extraction uses `local_files_only=True`.
+Override it with `IMAGE_EXTRACT_URL` if the public URL changes. Uploaded PDFs are rendered to page images with `pypdfium2` before being sent to the same endpoint.
 
 If the Excel file is missing, `database.py` loads a small built-in demo dataset so the app can still open for UI testing.
