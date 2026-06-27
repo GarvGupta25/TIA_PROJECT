@@ -16,7 +16,7 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "outputs")
 ALL_COLUMNS = [
     "emp_id", "full_name", "working_days", "ot_hours", "gross_billable",
     "markup_pct", "invoice_amount", "vat_amount", "final_total",
-    "confidence_score", "status", "anomaly_flags",
+    "confidence_score", "status", "review_reason", "anomaly_flags",
 ]
 
 
@@ -109,4 +109,16 @@ def export_erp_excel(records, client_code: str, columns=None):
     rows = [{col: _value(record, col) for col in columns} for record in records]
     path = os.path.join(OUTPUT_DIR, f"ERP_{client_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx")
     pd.DataFrame(rows).to_excel(path, index=False)
+    return path
+
+
+def export_auto_approved_csv(records, client_code: str):
+    _ensure_output_dir()
+    auto_records = [record for record in records if record.get("status") == "AUTO_APPROVED"]
+    if not auto_records:
+        return None
+    columns = ["emp_id", "full_name", "working_days", "ot_hours", "final_total", "confidence_score", "status", "review_reason"]
+    rows = [{col: _value(record, col) for col in columns} for record in auto_records]
+    path = os.path.join(OUTPUT_DIR, f"AUTO_APPROVED_{client_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+    pd.DataFrame(rows).to_csv(path, index=False)
     return path

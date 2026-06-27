@@ -7,12 +7,13 @@ from validator import validate_record
 
 
 ALIASES = {
-    "emp_id": ["emp_id", "employee id", "employee_id", "id", "employee code"],
+    "emp_id": ["emp_id", "emp id", "employee id", "employee_id", "id", "employee code"],
     "full_name": ["full name", "employee name", "name", "full_name"],
     "working_days": ["working days", "days", "attendance days", "working_days"],
     "ot_hours": ["ot hours", "overtime", "overtime hours", "ot_hours"],
-    "submitted_total": ["submitted total", "invoice amount", "amount", "total", "submitted_total"],
+    "submitted_total": ["submitted total", "invoice amount", "amount", "total", "submitted_total", "net pay", "gross"],
     "iban": ["iban", "bank iban"],
+    "client_code": ["client code", "client_code"],
     "reimbursement_amount": ["reimbursement", "reimbursements", "reimbursement amount", "expenses"],
     "reimbursement_reason": ["reimbursement reason", "expense reason", "reason"],
 }
@@ -48,10 +49,22 @@ def extract_from_excel(file_path: str, selected_client_code: str):
     elif ext == ".tsv":
         df = pd.read_csv(file_path, sep="\t")
     else:
-        df = pd.read_excel(file_path)
+        xls = pd.ExcelFile(file_path)
+        preferred = None
+        for sheet_name in xls.sheet_names:
+            sample = pd.read_excel(file_path, sheet_name=sheet_name, nrows=1)
+            cols = {str(c).strip().lower() for c in sample.columns}
+            if {"emp id", "working days"}.issubset(cols) or {"employee id", "working days"}.issubset(cols):
+                preferred = sheet_name
+                break
+        preferred = preferred or ("Payroll_June2026" if "Payroll_June2026" in xls.sheet_names else xls.sheet_names[0])
+        df = pd.read_excel(file_path, sheet_name=preferred)
 
     records = []
     for _, row in df.iterrows():
+        row_client_code = str(_find(row, "client_code") or "").strip()
+        if row_client_code and row_client_code != selected_client_code:
+            continue
         reimb_amount = _to_float(_find(row, "reimbursement_amount"))
         reimbursements = []
         if reimb_amount:

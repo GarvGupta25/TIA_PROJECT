@@ -11,6 +11,7 @@ DB_PATH = os.path.join(BASE_DIR, "tasc.db")
 EXCEL_PATH = os.path.join(BASE_DIR, "TASC_Sample_Database_vF.xlsx")
 
 COL_MAP = {
+    "Emp ID": "emp_id",
     "Employee ID": "emp_id",
     "Full Name": "full_name",
     "Email": "email",
@@ -22,10 +23,15 @@ COL_MAP = {
     "Date of Joining": "date_of_joining",
     "Status": "status",
     "IBAN": "iban",
+    "Basic": "basic",
     "Basic Salary": "basic",
+    "Housing": "housing",
     "Housing Allowance": "housing",
+    "Transport": "transport",
     "Transport Allowance": "transport",
+    "Food": "food",
     "Food Allowance": "food",
+    "Phone": "phone",
     "Phone Allowance": "phone",
     "Total CTC": "total_ctc",
 }
@@ -79,9 +85,16 @@ def _create_base_tables(conn):
 def initialize_database(use_sample_if_missing=True):
     conn = get_connection()
     if os.path.exists(EXCEL_PATH):
-        df = pd.read_excel(EXCEL_PATH)
+        xls = pd.ExcelFile(EXCEL_PATH)
+        sheet_name = "Employees" if "Employees" in xls.sheet_names else xls.sheet_names[0]
+        df = pd.read_excel(EXCEL_PATH, sheet_name=sheet_name)
         df.rename(columns=COL_MAP, inplace=True)
-        df = df[[c for c in COL_MAP.values() if c in df.columns]]
+        df = df.loc[:, ~df.columns.duplicated()]
+        known_cols = []
+        for col in COL_MAP.values():
+            if col in df.columns and col not in known_cols:
+                known_cols.append(col)
+        df = df[known_cols]
     elif use_sample_if_missing:
         df = _sample_employees()
         print("TASC_Sample_Database_vF.xlsx not found; loaded built-in demo data.")

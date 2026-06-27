@@ -1,0 +1,8 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10002,Ahmed Khan,23.0,4.0,9055.64,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10003,Meera Al Rashid,23.0,0.0,14253.14,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10004,Hana Al Farsi,22.0,8.0,9721.99,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10010,Noor Khan,23.0,4.0,5934.93,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10011,Ravi Al Hamdan,22.0,2.0,4879.32,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10017,Elena Al Muhairi,22.0,2.0,16096.7,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10020,Rajesh Johnson,23.0,0.0,14253.14,100,AUTO_APPROVED,No review needed - all validation checks passed.

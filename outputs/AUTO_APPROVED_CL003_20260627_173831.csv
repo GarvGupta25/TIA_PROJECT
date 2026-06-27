@@ -1,0 +1,9 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10042,Sarah Gupta,23.0,0.0,20485.7,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10043,Abdullah Al Hamdan,22.0,0.0,16223.31,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10044,Rajesh Kumar,22.0,4.0,8424.83,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10046,Sanjay Nair,23.0,2.0,20387.41,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10047,Hassan Brown,23.0,4.0,27069.2,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10050,Sanjay Patel,23.0,8.0,8813.54,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10056,Michael Gupta,23.0,0.0,16347.69,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10060,Sunita Al Hamdan,21.0,0.0,6157.04,100,AUTO_APPROVED,No review needed - all validation checks passed.

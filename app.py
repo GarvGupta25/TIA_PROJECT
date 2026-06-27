@@ -14,7 +14,7 @@ from database import (
     save_client_columns,
     save_client_markup,
 )
-from invoice_generator import ALL_COLUMNS, export_erp_excel, generate_invoice_pdf
+from invoice_generator import ALL_COLUMNS, export_auto_approved_csv, export_erp_excel, generate_invoice_pdf
 from router import process_file
 
 
@@ -52,6 +52,7 @@ def _records_table(records):
     for r in records:
         pay = r.get("payroll", {})
         flags = ", ".join(r.get("anomaly_flags", [])) or "None"
+        reason = r.get("review_reason") or ""
         name = r.get("full_name") or (r.get("resolved_emp") or {}).get("full_name", "")
         rows.append(
             "<tr>"
@@ -62,12 +63,13 @@ def _records_table(records):
             f"<td>AED {pay.get('final_total', 0):,.2f}</td>"
             f"<td>{r.get('confidence_score', 0)}</td>"
             f"<td>{_badge(r.get('status'))}</td>"
+            f"<td>{html.escape(reason)}</td>"
             f"<td>{html.escape(flags)}</td>"
             "</tr>"
         )
     return (
         "<table><thead><tr><th>Emp ID</th><th>Name</th><th>Days</th><th>OT</th>"
-        "<th>Total</th><th>Score</th><th>Status</th><th>Flags</th></tr></thead><tbody>"
+        "<th>Total</th><th>Score</th><th>Status</th><th>Review Reason</th><th>Flags</th></tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table>"
     )
@@ -89,9 +91,9 @@ def _summary_cards(records):
 
 def process_upload(client_choice, files):
     if not client_choice:
-        return "<p style='color:#f85149'>Select a client first.</p>", ""
+        return "<p style='color:#f85149'>Select a client first.</p>", "", gr.update(visible=False)
     if not files:
-        return "<p style='color:#f85149'>Upload at least one Excel, email, PDF, or image file.</p>", ""
+        return "<p style='color:#f85149'>Upload at least one Excel, email, PDF, or image file.</p>", "", gr.update(visible=False)
     code = _client_code(client_choice)
     all_records = []
     errors = []
@@ -107,7 +109,9 @@ def process_upload(client_choice, files):
     err_html = ""
     if errors:
         err_html = "<p style='color:#f85149'>" + "<br>".join(html.escape(e) for e in errors) + "</p>"
-    return _summary_cards(all_records) + err_html, _records_table(all_records)
+    csv_path = export_auto_approved_csv(all_records, code)
+    csv_update = gr.update(value=csv_path, visible=bool(csv_path))
+    return _summary_cards(all_records) + err_html, _records_table(all_records), csv_update
 
 
 def render_exception_queue():
@@ -213,7 +217,8 @@ def build_app():
             run = gr.Button("Process Batch", variant="primary")
             summary = gr.HTML()
             table = gr.HTML()
-            run.click(process_upload, inputs=[client, files], outputs=[summary, table])
+            auto_csv = gr.File(label="Auto-approved CSV", visible=False)
+            run.click(process_upload, inputs=[client, files], outputs=[summary, table, auto_csv])
 
         with gr.Tab("Exception Queue"):
             refresh = gr.Button("Refresh Queue")
