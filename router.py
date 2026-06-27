@@ -34,7 +34,7 @@ def process_file(file_path: str, client_code: str):
 
         return extract_from_image(file_path, client_code)
     if input_type == "pdf":
-        from extractor_email import extract_from_pdf
+        from extractor_image import extract_from_pdf_images
 
-        return extract_from_pdf(file_path, client_code)
+        return extract_from_pdf_images(file_path, client_code)
     raise ValueError(f"Unsupported input type for {file_path}")

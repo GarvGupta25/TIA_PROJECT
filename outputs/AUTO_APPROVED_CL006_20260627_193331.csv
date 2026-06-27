@@ -1,0 +1,6 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10104,Rajesh Khan,24.0,4.0,5964.81,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10106,Ali Kumar,24.0,0.0,15604.62,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10108,Sanjay Sharma,25.0,8.0,11509.62,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10115,James Al Mansoori,24.0,2.0,16337.59,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10116,Rajesh Nair,26.0,0.0,11760.0,100,AUTO_APPROVED,No review needed - all validation checks passed.

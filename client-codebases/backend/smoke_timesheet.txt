@@ -1,0 +1,4 @@
+Employee ID: EMP10001
+Full Name: Aisha Al Zaabi
+Working Days: 1
+OT Hours: 0

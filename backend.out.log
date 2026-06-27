@@ -1,0 +1,10 @@
+INFO:     127.0.0.1:57784 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56685 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56685 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56685 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62513 - "POST /api/upload/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62513 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49924 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49924 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58132 - "GET /api/returned/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58132 - "GET /api/returned/1 HTTP/1.1" 200 OK

@@ -1,0 +1,6 @@
+INFO:     127.0.0.1:56244 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56246 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "GET /api/notifications/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53653 - "GET /api/returned/1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53653 - "GET /api/returned/1 HTTP/1.1" 404 Not Found
