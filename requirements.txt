@@ -1,6 +1,7 @@
 gradio==4.44.0
 pydantic<2.11
 fastapi==0.111.0
+uvicorn[standard]
 starlette==0.37.2
 pandas
 openpyxl
@@ -14,3 +15,4 @@ torch
 torchvision
 Pillow
 qwen-vl-utils
+pypdfium2

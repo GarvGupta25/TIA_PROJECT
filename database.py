@@ -78,6 +78,35 @@ def _create_base_tables(conn):
             status TEXT DEFAULT 'PENDING', confidence_score INTEGER,
             anomaly_flags TEXT, created_at TEXT, resolved_at TEXT, resolution TEXT
         );
+        CREATE TABLE IF NOT EXISTS flagged_reviews (
+            review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id TEXT,
+            client_code TEXT,
+            source TEXT,
+            emp_id TEXT,
+            full_name TEXT,
+            working_days REAL,
+            ot_hours REAL,
+            submitted_total REAL,
+            iban TEXT,
+            reimbursements_json TEXT DEFAULT '[]',
+            gross_billable REAL,
+            markup_pct REAL,
+            invoice_amount REAL,
+            vat_amount REAL,
+            final_total REAL,
+            confidence_score INTEGER,
+            status TEXT,
+            review_reason TEXT,
+            anomaly_flags TEXT DEFAULT '[]',
+            resolution_method TEXT,
+            resolved_emp_json TEXT,
+            raw_input_snapshot TEXT,
+            payroll_decision TEXT DEFAULT 'Pending',
+            marked_for_review TEXT DEFAULT 'No',
+            created_at TEXT,
+            exported_at TEXT
+        );
         """
     )
 
@@ -123,8 +152,23 @@ def initialize_database(use_sample_if_missing=True):
 
 
 def ensure_database():
+    needs_init = False
     if not os.path.exists(DB_PATH):
+        needs_init = True
+    else:
+        conn = get_connection()
+        count = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='clients'").fetchone()[0]
+        conn.close()
+        if count == 0:
+            needs_init = True
+            
+    if needs_init:
         initialize_database()
+    else:
+        conn = get_connection()
+        _create_base_tables(conn)
+        conn.commit()
+        conn.close()
 
 
 def get_all_clients():

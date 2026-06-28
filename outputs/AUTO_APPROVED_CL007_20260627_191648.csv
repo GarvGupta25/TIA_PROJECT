@@ -1,0 +1,6 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10123,Yasmin Patel,22.0,8.0,26862.63,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10127,Hana Smith,21.0,0.0,18611.05,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10129,Meera Gupta,23.0,0.0,20485.7,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10131,Sunita Khan,22.0,0.0,9479.88,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10140,Sunita Al Farsi,23.0,0.0,27024.78,100,AUTO_APPROVED,No review needed - all validation checks passed.

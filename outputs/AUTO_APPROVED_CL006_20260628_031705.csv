@@ -1,0 +1,8 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10101,Michael Khan,23.0,4.0,24510.42,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10102,Sunita Gupta,23.0,0.0,24061.76,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10107,Hana Menon,21.0,0.0,21922.79,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10110,Rajesh Patel,23.0,4.0,7852.89,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10112,Yasmin Patel,23.0,8.0,9273.31,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10117,Elena Kumar,21.0,8.0,6006.0,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10119,Noor Gupta,23.0,0.0,9910.79,100,AUTO_APPROVED,No review needed - all validation checks passed.

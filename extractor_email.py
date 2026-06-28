@@ -37,8 +37,8 @@ def extract_from_email(file_path: str, selected_client_code: str):
 
 
 def _amount_after(label, text):
-    match = re.search(label + r"\s*[:\-]?\s*(AED)?\s*([\d,]+(?:\.\d+)?)", text, re.I)
-    return float(match.group(2).replace(",", "")) if match else 0.0
+    match = re.search(r"(?:" + label + r")\s*[:\-]?\s*(?:AED)?\s*([\d,]+(?:\.\d+)?)", text, re.I)
+    return float(match.group(1).replace(",", "")) if match else 0.0
 
 
 def _extract_from_text(text: str, selected_client_code: str, source: str):

@@ -1,0 +1,2 @@
+client_code,source,emp_id,full_name,working_days,ot_hours,submitted_total,iban,final_total,confidence_score,status,payroll_decision,marked_for_review,review_reason,anomaly_flags
+CL004,excel,EMP10064,Carlos Patel,24.0,4.0,7870.19,,8614.75,82,REJECTED,Reject Payroll,Yes,"Submitted amount AED 7,870.19 differs from calculated invoice total AED 8,614.75 by 9.5%, which is above the 5% tolerance.",INVOICE_AMOUNT_DEVIATION

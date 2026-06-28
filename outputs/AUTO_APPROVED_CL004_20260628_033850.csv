@@ -1,0 +1,15 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10061,Noor Al Hamdan,22.0,0.0,23259.93,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10063,Sunita Al Zaabi,23.0,0.0,16603.12,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10068,Sofia Al Hamdan,22.0,0.0,23553.12,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10071,Ana Al Muhairi,22.0,0.0,5130.87,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10072,Aisha Al Zaabi,22.0,2.0,16341.03,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10074,Abdullah Al Rashid,22.0,4.0,20158.09,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10075,Sofia Sharma,22.0,4.0,15774.63,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10061,Noor Al Hamdan,22.0,0.0,23259.93,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10063,Sunita Al Zaabi,23.0,0.0,16603.12,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10068,Sofia Al Hamdan,22.0,0.0,23553.12,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10071,Ana Al Muhairi,22.0,0.0,5130.87,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10072,Aisha Al Zaabi,22.0,2.0,16341.03,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10074,Abdullah Al Rashid,22.0,4.0,20158.09,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10075,Sofia Sharma,22.0,4.0,15774.63,100,AUTO_APPROVED,No review needed - all validation checks passed.

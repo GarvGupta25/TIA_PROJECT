@@ -1,0 +1,2 @@
+client_code,source,emp_id,full_name,working_days,ot_hours,submitted_total,iban,final_total,confidence_score,status,payroll_decision,marked_for_review,review_reason,anomaly_flags
+CL007,excel,EMP10134,Sunita Smith,25.0,4.0,8194.23,,9328.84,82,REVIEW_REQUIRED,Accept Payroll,Yes,"Submitted amount AED 8,194.23 differs from calculated invoice total AED 9,328.84 by 13.8%, which is above the 5% tolerance.",INVOICE_AMOUNT_DEVIATION

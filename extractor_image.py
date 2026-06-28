@@ -1,93 +1,173 @@
 import json
+import mimetypes
 import os
 import re
+import tempfile
+import uuid
+from urllib import error, request
 
 from confidence import assign_status
 from validator import validate_record
 
 
-MODEL_LOCAL_PATH = os.path.join(os.path.dirname(__file__), "models", "qwen2_5_vl_7b")
-USE_4BIT = False
-_MODEL = None
-_PROCESSOR = None
+REMOTE_EXTRACT_URL = os.getenv("IMAGE_EXTRACT_URL", "https://uncorrupt-lunar-imbecile.ngrok-free.dev/extract")
+REMOTE_TIMEOUT_SECONDS = int(os.getenv("IMAGE_EXTRACT_TIMEOUT_SECONDS", "120"))
 
 
-def _model_ready():
-    return os.path.exists(os.path.join(MODEL_LOCAL_PATH, "config.json"))
+def _to_float(value, default=0.0):
+    try:
+        if value is None or value == "":
+            return default
+        return float(str(value).replace(",", "").strip())
+    except (TypeError, ValueError):
+        return default
 
 
-def _load_qwen():
-    global _MODEL, _PROCESSOR
-    if _MODEL is not None and _PROCESSOR is not None:
-        return _MODEL, _PROCESSOR
-    if not _model_ready():
-        raise FileNotFoundError(
-            f"Qwen weights not found at {MODEL_LOCAL_PATH}. Copy the Qwen2.5-VL-7B-Instruct snapshot there first."
-        )
-    from transformers import AutoProcessor
+def _parse_json_from_text(text):
+    match = re.search(r"\{.*\}|\[.*\]", text or "", re.S)
+    if not match:
+        raise ValueError("Image model did not return JSON records.")
+    return json.loads(match.group(0))
+
+
+def _normalize_remote_payload(payload):
+    if isinstance(payload, str):
+        payload = _parse_json_from_text(payload)
+
+    if isinstance(payload, dict) and str(payload.get("status", "")).lower() == "error":
+        raise RuntimeError(payload.get("message") or "Image model returned an error.")
+
+    if isinstance(payload, dict):
+        for key in ("records", "data", "result", "results", "extracted_data", "items", "output"):
+            if key in payload:
+                return _normalize_remote_payload(payload[key])
+        return [payload]
+
+    if isinstance(payload, list):
+        return payload
+
+    raise ValueError("Image model returned an unsupported response shape.")
+
+
+def _post_file_to_model(file_path):
+    boundary = f"----TIAImageExtract{uuid.uuid4().hex}"
+    filename = os.path.basename(file_path)
+    content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+
+    with open(file_path, "rb") as handle:
+        file_bytes = handle.read()
+
+    body = b"".join(
+        [
+            f"--{boundary}\r\n".encode("utf-8"),
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"),
+            f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"),
+            file_bytes,
+            f"\r\n--{boundary}--\r\n".encode("utf-8"),
+        ]
+    )
+    req = request.Request(
+        REMOTE_EXTRACT_URL,
+        data=body,
+        method="POST",
+        headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "ngrok-skip-browser-warning": "true",
+        },
+    )
 
     try:
-        from transformers import Qwen2_5_VLForConditionalGeneration as QwenModel
-    except ImportError:
-        from transformers import Qwen2VLForConditionalGeneration as QwenModel
+        with request.urlopen(req, timeout=REMOTE_TIMEOUT_SECONDS) as response:
+            raw = response.read().decode("utf-8", "replace")
+    except error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")
+        raise RuntimeError(f"Image model request failed with HTTP {exc.code}: {detail}") from exc
+    except error.URLError as exc:
+        raise RuntimeError(f"Could not reach image model at {REMOTE_EXTRACT_URL}: {exc.reason}") from exc
 
-    kwargs = {"local_files_only": True, "device_map": "auto"}
-    if USE_4BIT:
-        from transformers import BitsAndBytesConfig
-
-        kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)
-    _MODEL = QwenModel.from_pretrained(MODEL_LOCAL_PATH, **kwargs)
-    _PROCESSOR = AutoProcessor.from_pretrained(MODEL_LOCAL_PATH, local_files_only=True)
-    return _MODEL, _PROCESSOR
-
-
-def _parse_json(text):
-    match = re.search(r"\{.*\}|\[.*\]", text, re.S)
-    if not match:
-        raise ValueError("Qwen did not return JSON.")
-    data = json.loads(match.group(0))
-    return data if isinstance(data, list) else [data]
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
 
 
-def extract_from_image(file_path: str, selected_client_code: str):
-    from PIL import Image
-    from qwen_vl_utils import process_vision_info
+def _first_value(item, keys):
+    for key in keys:
+        if isinstance(item, dict) and item.get(key) not in (None, ""):
+            return item.get(key)
+    return None
 
-    model, processor = _load_qwen()
-    image = Image.open(file_path).convert("RGB")
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "image", "image": image},
-                {
-                    "type": "text",
-                    "text": (
-                        "Extract timesheet rows as JSON array. Fields: emp_id, full_name, "
-                        "working_days, ot_hours, submitted_total, iban, reimbursements."
-                    ),
-                },
-            ],
-        }
-    ]
-    text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    image_inputs, video_inputs = process_vision_info(messages)
-    inputs = processor(text=[text], images=image_inputs, videos=video_inputs, padding=True, return_tensors="pt").to(model.device)
-    generated_ids = model.generate(**inputs, max_new_tokens=512)
-    output_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+def _normalize_reimbursements(value):
+    if not value:
+        return []
+    if isinstance(value, (int, float, str)):
+        amount = _to_float(value, None)
+        return [{"amount": amount, "reason": ""}] if amount else []
+    if isinstance(value, dict):
+        value = [value]
+    reimbursements = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        amount = _to_float(_first_value(item, ("amount", "reimbursement_amount", "expense_amount")), None)
+        if amount:
+            reimbursements.append({"amount": amount, "reason": _first_value(item, ("reason", "description", "expense_reason")) or ""})
+    return reimbursements
+
+
+def _records_from_model_file(file_path, selected_client_code, raw_source="image"):
+    payload = _post_file_to_model(file_path)
+    rows = _normalize_remote_payload(payload)
     records = []
-    for item in _parse_json(output_text):
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
         record = {
             "source": "image",
-            "emp_id": item.get("emp_id"),
-            "full_name": item.get("full_name"),
-            "working_days": float(item.get("working_days") or 0),
-            "ot_hours": float(item.get("ot_hours") or 0),
-            "submitted_total": item.get("submitted_total"),
-            "iban": item.get("iban"),
-            "reimbursements": item.get("reimbursements") or [],
-            "raw_input_snapshot": item,
+            "emp_id": str(_first_value(item, ("emp_id", "employee_id", "employee_code", "id")) or "").strip() or None,
+            "full_name": str(_first_value(item, ("full_name", "employee_name", "name")) or "").strip() or None,
+            "working_days": _to_float(_first_value(item, ("working_days", "days", "attendance_days"))),
+            "ot_hours": _to_float(_first_value(item, ("ot_hours", "overtime_hours", "overtime"))),
+            "submitted_total": _to_float(_first_value(item, ("submitted_total", "invoice_amount", "amount", "total", "net_pay", "gross")), None),
+            "iban": str(_first_value(item, ("iban", "bank_iban")) or "").strip() or None,
+            "reimbursements": _normalize_reimbursements(
+                _first_value(item, ("reimbursements", "reimbursement", "expenses", "reimbursement_amount"))
+            ),
+            "raw_input_snapshot": {"model_response": item, "source_file": os.path.basename(file_path), "raw_source": raw_source},
             "anomaly_flags": [],
         }
         records.append(assign_status(validate_record(record, selected_client_code)))
+    return records
+
+
+def _render_pdf_pages(file_path, output_dir):
+    try:
+        import pypdfium2 as pdfium
+    except ImportError as exc:
+        raise RuntimeError("Install pypdfium2 to route PDF pages through the image model.") from exc
+
+    image_paths = []
+    pdf = pdfium.PdfDocument(file_path)
+    try:
+        for index in range(len(pdf)):
+            page = pdf[index]
+            pil_image = page.render(scale=2).to_pil().convert("RGB")
+            image_path = os.path.join(output_dir, f"page_{index + 1}.png")
+            pil_image.save(image_path)
+            image_paths.append(image_path)
+    finally:
+        pdf.close()
+    return image_paths
+
+
+def extract_from_image(file_path: str, selected_client_code: str):
+    return _records_from_model_file(file_path, selected_client_code, "image")
+
+
+def extract_from_pdf_images(file_path: str, selected_client_code: str):
+    records = []
+    with tempfile.TemporaryDirectory(prefix="tia_pdf_pages_") as tmpdir:
+        for image_path in _render_pdf_pages(file_path, tmpdir):
+            records.extend(_records_from_model_file(image_path, selected_client_code, "pdf"))
     return records

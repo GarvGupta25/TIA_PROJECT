@@ -1,0 +1,9 @@
+emp_id,full_name,working_days,ot_hours,final_total,confidence_score,status,review_reason
+EMP10166,Carlos Al Rashid,21.0,4.0,15026.1,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10167,Elena Reddy,23.0,0.0,7918.42,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10170,Fatima Al Hamdan,22.0,2.0,9919.12,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10171,Lakshmi Al Hamdan,22.0,0.0,5863.84,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10173,Omar Johnson,22.0,8.0,5004.26,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10174,Priya Kumar,22.0,0.0,19301.82,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10176,Abdullah Nair,22.0,0.0,7769.59,100,AUTO_APPROVED,No review needed - all validation checks passed.
+EMP10179,James Khan,23.0,0.0,26565.0,100,AUTO_APPROVED,No review needed - all validation checks passed.
