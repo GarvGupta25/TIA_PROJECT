@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, CheckCircle, Clock, AlertTriangle, RefreshCw, XCircle, ChevronDown, ChevronUp, Download } from 'lucide-react';
+<<<<<<< HEAD
+=======
+import VoiceMicButton from '../components/VoiceMicButton';
+import { useVoiceInput } from '../hooks/useVoiceInput';
+>>>>>>> 83377e60 (smallest.ai integration)
 
 const API_BASE = 'http://127.0.0.1:8001';
 
@@ -94,6 +99,17 @@ function InvoiceCard({ invoice, onRefresh }) {
   const isPending = invoice.status === 'PENDING_APPROVAL';
   const clientCode = localStorage.getItem('client_code') || 'CL004';
 
+<<<<<<< HEAD
+=======
+  const handleTranscript = useCallback((text, isFinal) => {
+    if (isFinal) {
+      setInputText(prev => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + text + ' ');
+    }
+  }, []);
+
+  const { isListening, interimTranscript, startListening, stopListening } = useVoiceInput(handleTranscript);
+
+>>>>>>> 83377e60 (smallest.ai integration)
   let lineItems = [];
   try {
     lineItems = invoice.line_items ? JSON.parse(invoice.line_items) : [];
@@ -241,6 +257,7 @@ function InvoiceCard({ invoice, onRefresh }) {
       {/* Inline action input */}
       {actionState && (
         <div style={{ marginBottom: 14 }}>
+<<<<<<< HEAD
           <textarea
             value={inputText}
             onChange={e => setInputText(e.target.value)}
@@ -249,6 +266,25 @@ function InvoiceCard({ invoice, onRefresh }) {
             rows={3}
             style={{ resize: 'vertical', marginBottom: 8 }}
           />
+=======
+          <div style={{ position: 'relative' }}>
+            <textarea
+              value={isListening && interimTranscript ? inputText + (inputText.endsWith(' ') ? '' : ' ') + interimTranscript : inputText}
+              onChange={e => setInputText(e.target.value)}
+              placeholder={actionState === 'dispute' ? 'Describe the reason for your dispute...' : 'Describe the correction needed...'}
+              className={`input-field ${isListening && interimTranscript ? 'voice-interim-text' : ''}`}
+              rows={3}
+              style={{ resize: 'vertical', marginBottom: 8, paddingRight: '40px', width: '100%' }}
+              disabled={isListening}
+            />
+            <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+              <VoiceMicButton 
+                isListening={isListening} 
+                onClick={isListening ? stopListening : startListening} 
+              />
+            </div>
+          </div>
+>>>>>>> 83377e60 (smallest.ai integration)
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               className="btn-primary"

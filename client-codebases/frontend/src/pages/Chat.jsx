@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Building } from 'lucide-react';
+=======
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, User, Building } from 'lucide-react';
+import VoiceMicButton from '../components/VoiceMicButton';
+import { useVoiceInput } from '../hooks/useVoiceInput';
+>>>>>>> 83377e60 (smallest.ai integration)
 
 const Chat = () => {
   const [messages, setMessages] = useState([
@@ -9,6 +16,18 @@ const Chat = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+<<<<<<< HEAD
+=======
+  
+  const handleTranscript = useCallback((text, isFinal) => {
+    if (isFinal) {
+      setInput(prev => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + text + ' ');
+    }
+  }, []);
+
+  const { isListening, interimTranscript, startListening, stopListening } = useVoiceInput(handleTranscript);
+  
+>>>>>>> 83377e60 (smallest.ai integration)
   const endOfMessagesRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -99,6 +118,7 @@ const Chat = () => {
         {/* Input Area */}
         <div className="chat-input-bar">
           <form onSubmit={handleSend} style={{ display: 'flex', gap: '12px' }}>
+<<<<<<< HEAD
             <input 
               type="text" 
               value={input}
@@ -106,6 +126,22 @@ const Chat = () => {
               placeholder="Type your message..." 
               className="input-field" 
               style={{ flex: 1 }}
+=======
+            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="text" 
+                value={isListening && interimTranscript ? input + (input.endsWith(' ') ? '' : ' ') + interimTranscript : input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..." 
+                className={`input-field ${isListening && interimTranscript ? 'voice-interim-text' : ''}`} 
+                style={{ flex: 1, width: '100%' }}
+                disabled={isListening}
+              />
+            </div>
+            <VoiceMicButton 
+              isListening={isListening} 
+              onClick={isListening ? stopListening : startListening} 
+>>>>>>> 83377e60 (smallest.ai integration)
             />
             <button type="submit" className="btn-primary send-round">
               <Send size={20} />

@@ -1372,6 +1372,147 @@ def _submission_timeline_html():
     )
 
 
+<<<<<<< HEAD
+=======
+HEAD_HTML = """
+<style>
+.gradio-mic-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: rgba(30, 45, 64, 0.8);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    z-index: 10;
+}
+.gradio-mic-btn:hover {
+    color: #38BDF8;
+    border-color: #38BDF8;
+}
+.gradio-mic-btn.listening {
+    color: #EF4444;
+    border-color: #EF4444;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+</style>
+<script>
+(function() {
+    function attachMic(elemId) {
+        const container = document.getElementById(elemId);
+        if (!container) return false;
+        
+        // Check if already attached
+        if (container.dataset.micAttached === 'true') return true;
+        
+        // find the textarea
+        const textarea = container.querySelector('textarea');
+        if (!textarea) return false;
+        
+        container.dataset.micAttached = 'true';
+        
+        // create button
+        const btn = document.createElement('button');
+        btn.className = 'gradio-mic-btn';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>';
+        
+        textarea.parentElement.style.position = 'relative';
+        textarea.parentElement.appendChild(btn);
+        
+        let ws = null;
+        let audioContext = null;
+        let processor = null;
+        let mediaStream = null;
+        let isListening = false;
+        
+        const stopListening = () => {
+            isListening = false;
+            btn.classList.remove('listening');
+            if (processor) { processor.disconnect(); processor = null; }
+            if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+            if (audioContext) { audioContext.close(); audioContext = null; }
+            if (ws) { ws.close(); ws = null; }
+        };
+
+        btn.onclick = async (e) => {
+            e.preventDefault();
+            if (isListening) {
+                stopListening();
+                return;
+            }
+            
+            try {
+                ws = new WebSocket('ws://127.0.0.1:8500/ws/stt');
+                ws.onopen = async () => {
+                    isListening = true;
+                    btn.classList.add('listening');
+                    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1 }});
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioContext = new AudioContext({ sampleRate: 16000 });
+                    const source = audioContext.createMediaStreamSource(mediaStream);
+                    processor = audioContext.createScriptProcessor(4096, 1, 1);
+                    
+                    processor.onaudioprocess = (e) => {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            const inputData = e.inputBuffer.getChannelData(0);
+                            const pcmData = new Int16Array(inputData.length);
+                            for (let i = 0; i < inputData.length; i++) {
+                                let s = Math.max(-1, Math.min(1, inputData[i]));
+                                pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                            }
+                            ws.send(pcmData.buffer);
+                        }
+                    };
+                    source.connect(processor);
+                    processor.connect(audioContext.destination);
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.is_final && data.transcript) {
+                            const currentText = textarea.value;
+                            const newText = currentText + (currentText.endsWith(' ') || currentText.length === 0 ? '' : ' ') + data.transcript + ' ';
+                            
+                            // Set value and trigger Gradio's internal state update
+                            textarea.value = newText;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    } catch (e) {}
+                };
+                
+                ws.onerror = () => stopListening();
+                ws.onclose = () => stopListening();
+            } catch (err) {
+                console.error("STT Error", err);
+                stopListening();
+            }
+        };
+        
+        return true;
+    }
+    
+    // Poll for elements since Gradio renders tabs dynamically
+    setInterval(() => {
+        attachMic('dispute_response_input');
+        attachMic('dispatch_notes_input');
+        attachMic('query_assistant_input');
+    }, 1000);
+})();
+</script>
+"""
+
+>>>>>>> 83377e60 (smallest.ai integration)
 def build_app():
     ensure_database()
     _ensure_disputes_table()
@@ -1470,7 +1611,11 @@ def build_app():
                         label="",
                     )
                     dispute_selector = gr.Radio(choices=[], label="Select Dispute to Respond")
+<<<<<<< HEAD
                     dispute_response_input = gr.Textbox(label="Response", lines=3, placeholder="Type your response here...")
+=======
+                    dispute_response_input = gr.Textbox(label="Response", lines=3, placeholder="Type your response here...", elem_id="dispute_response_input")
+>>>>>>> 83377e60 (smallest.ai integration)
                     send_response_btn = gr.Button("Send Response", variant="primary")
                     dispute_response_msg = gr.HTML()
 
@@ -1521,7 +1666,11 @@ def build_app():
             gr.HTML("<h3 style='font-size:15px;font-weight:700;color:#F1F5F9;margin-bottom:12px'>Dispatch to Client Portal</h3>")
             with gr.Row():
                 dispatch_client_dropdown = gr.Dropdown(choices=_client_choices(), label="Client (auto-filled from batch)", scale=2)
+<<<<<<< HEAD
                 dispatch_notes_input = gr.Textbox(label="Dispatch Notes", placeholder="Optional notes for the client...", scale=3)
+=======
+                dispatch_notes_input = gr.Textbox(label="Dispatch Notes", placeholder="Optional notes for the client...", scale=3, elem_id="dispatch_notes_input")
+>>>>>>> 83377e60 (smallest.ai integration)
             push_btn = gr.Button("Push Invoice to Client Portal", variant="primary")
             push_msg = gr.HTML()
 
@@ -1561,7 +1710,11 @@ def build_app():
             gr.HTML(
                 "<p style='color:#94A3B8;font-size:13px;margin-bottom:12px'>Ask questions about employees, invoices, billing history, exception rates, and more.</p>"
             )
+<<<<<<< HEAD
             question = gr.Textbox(label="Question", lines=2, placeholder="What is the total AED billed to ADNOC across all batches?")
+=======
+            question = gr.Textbox(label="Question", lines=2, placeholder="What is the total AED billed to ADNOC across all batches?", elem_id="query_assistant_input")
+>>>>>>> 83377e60 (smallest.ai integration)
             ask = gr.Button("Ask", variant="primary")
             answer = gr.HTML()
             ask.click(answer_query, inputs=question, outputs=answer)
@@ -1571,16 +1724,16 @@ def build_app():
             cfg_client = gr.Dropdown(choices=_client_choices(), label="Client")
             cfg_columns = gr.CheckboxGroup(choices=ALL_COLUMNS, label="Invoice Output Columns")
             cfg_markup = gr.Number(label="TASC Markup %", minimum=0, maximum=50, step=0.5, value=10.0)
-            save = gr.Button("Save Settings", variant="primary")
-            msg = gr.Textbox(label="", interactive=False)
-            cfg_client.change(load_config, inputs=cfg_client, outputs=[cfg_columns, cfg_markup])
-            save.click(save_config, inputs=[cfg_client, cfg_columns, cfg_markup], outputs=msg)
     return app
 
 
 def launch():
     ensure_database()
+<<<<<<< HEAD
     build_app().queue().launch(server_name="127.0.0.1", server_port=7860, share=False, debug=True, css=CSS, theme=gr.themes.Base())
+=======
+    build_app().queue().launch(server_name="127.0.0.1", server_port=7860, share=False, debug=True, css=CSS, theme=gr.themes.Base(), head=HEAD_HTML)
+>>>>>>> 83377e60 (smallest.ai integration)
 
 
 if __name__ == "__main__":
